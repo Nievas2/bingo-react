@@ -4,11 +4,15 @@ import { Espacios } from "./Espacios";
 import { Diferentes } from "./Diferentes";
 import { Numeros } from "./Numeros";
 import { CheckDiferentes } from "./CheckDiferentes";
-import {WinnerModal} from "./Winner"
-/* import { Bolillero} from "./bolillero/Bolillero"
- */ export const Cartones = () => {
+import { WinnerModal } from "./Winner";
+import ConfettiExplosion from "react-confetti-explosion";
+export const Cartones = () => {
   const [numberBolillero, setNumberBolillero] = useState(0);
   const [resetGame, setResetGame] = useState(false);
+  const [round, setRound] = useState(0);
+  const [winner, setWinner] = useState(false);
+  const [isExploding, setIsExploding] = useState(false);
+
   const [primeraLinea, setPrimeraLinea] = useState(() => {
     return Array(7).fill(1);
   });
@@ -18,7 +22,7 @@ import {WinnerModal} from "./Winner"
   const [terceraLinea, setTerceraLinea] = useState(() => {
     return Array(7).fill(null);
   });
-  const [winner, setWinner] = useState(false);
+
 
   const espaciosBlancos = ({ espacio }) => {
     var newLinea = [...primeraLinea];
@@ -41,6 +45,7 @@ import {WinnerModal} from "./Winner"
   const checkExist = () => {
     setNumberBolillero(Math.floor(Math.random() * (69 - 0) + 0));
     let result = false;
+    setRound(round + 1);
     let index = 0;
     primeraLinea.forEach((element) => {
       index = index + 1;
@@ -78,20 +83,23 @@ import {WinnerModal} from "./Winner"
         }
       });
     }
-    const ganador = Winner()
-    if(ganador) setWinner(ganador)
-   
+    const ganador = Winner();
+    if (ganador)  {
+      setWinner(ganador);
+      setIsExploding(true);
+    } 
   };
 
   useEffect(() => {
+    setRound(0);
     var lineaDeEspacios1 = Espacios();
     var lineaDeEspacios2 = Espacios();
     var lineaDeEspacios3 = Espacios();
-  
+
     var EspaceFirtsLine = espaciosBlancos({ espacio: lineaDeEspacios1 });
     var EspaceSecondLine = espaciosBlancos({ espacio: lineaDeEspacios2 });
     var EspaceThirdLine = espaciosBlancos({ espacio: lineaDeEspacios3 });
-  
+
     var result = false;
     while (result == false) {
       result = Diferentes({
@@ -130,19 +138,33 @@ import {WinnerModal} from "./Winner"
   }, [resetGame]);
 
   const Winner = () => {
-    if (primeraLinea.every((element) => element === null || element === undefined)) {
-      if (segundaLinea.every((element) => element === null || element === undefined)) {
-        if (terceraLinea.every((element) => element === null || element === undefined)) {
+    if (
+      primeraLinea.every((element) => element === null || element === undefined)
+    ) {
+      if (
+        segundaLinea.every(
+          (element) => element === null || element === undefined
+        )
+      ) {
+        if (
+          terceraLinea.every(
+            (element) => element === null || element === undefined
+          )
+        ) {
+          setIsExploding(true);
           return true;
         }
       }
-    } 
-  }
+    }
+  };
   return (
     <section>
+      
       <div className="bg-gray-800 rounded-2xl md:p-10 p-3">
         <h1 className="text-4xl text-white">Carton</h1>
+       
         <div className="grid grid-cols-7  bg-gray-200">
+        
           {primeraLinea.map((primeraLinea, index) => (
             <div
               key={index}
@@ -180,17 +202,21 @@ import {WinnerModal} from "./Winner"
         >
           Generar una bolilla
         </button>
-        <p className="text-3xl text-white"> Bolilla {numberBolillero}</p>
+        <p className="text-3xl text-white"> Bolilla: {numberBolillero}</p>
+
         <button
-          onClick={()=>{
-            setResetGame(!resetGame)
+          onClick={() => {
+            setResetGame(!resetGame);
           }}
           className="p-2 bg-fuchsia-900 rounded-md mt-3 justify-center"
         >
           Resetear partida
         </button>
+        <p className="text-3xl text-white"> Ronda: {round}</p>
       </div>
-      <WinnerModal ganador={winner}/>
+      {isExploding && <ConfettiExplosion style={{ position: "absolute", zIndex: "1000", top: "40%", left: "50%"  }  }/>}
+      <WinnerModal ganador={winner} > </WinnerModal>
+      
     </section>
   );
 };
